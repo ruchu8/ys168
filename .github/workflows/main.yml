@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  ssh-login:
+  ys168-login:
     runs-on: ubuntu-latest
 
     steps:
