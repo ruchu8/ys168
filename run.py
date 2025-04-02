@@ -30,6 +30,8 @@ def login_to_website():
             loginip = data_ip['data']['ip']
             content = f"登录时间：{time}\n登录IP：{loginip}"
             
+            print(content)  # 确保内容输出到控制台
+            
             push = os.getenv('PUSH')
             if push == "telegram":
                 telegram_push(content)
@@ -58,12 +60,9 @@ def telegram_push(message):
     headers = {
         'Content-Type': 'application/json'
     }
-    try:
-        response = requests.post(url_telegram, json=payload, headers=headers)
-        if response.status_code != 200:
-            print(f"发送消息到Telegram失败: {response.text}")
-    except requests.exceptions.RequestException as e:
-        print(f"发送消息到Telegram时出错: {str(e)}")
+    response = requests.post(url_telegram, json=payload, headers=headers)
+    if response.status_code != 200:
+        print(f"发送消息到Telegram失败: {response.text}")
 
 # 调用登录函数
 login_to_website()
