@@ -31,8 +31,39 @@ def login_to_website():
             content = f"登录时间：{time}\n登录IP：{loginip}"
             
             push = os.getenv('PUSH')
+            if push == "telegram":
+                telegram_push(content)
+            else:
+                print("没有设置有效的推送方式")
 
+    except requests.exceptions.RequestException as e:
+        print(f"请求登录页面时出错: {str(e)}")
 
+def telegram_push(message):
+    url_telegram = f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/sendMessage"
+    payload = {
+        'chat_id': os.getenv('TELEGRAM_CHAT_ID'),
+        'text': message,
+        'reply_markup': {
+            'inline_keyboard': [
+                [
+                    {
+                        'text': '问题反馈',
+                        'url': 'https://t.me/CN_zzzwb'
+                    }
+                ]
+            ]
+        }
+    }
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    try:
+        response = requests.post(url_telegram, json=payload, headers=headers)
+        if response.status_code != 200:
+            print(f"发送消息到Telegram失败: {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"发送消息到Telegram时出错: {str(e)}")
 
 # 调用登录函数
 login_to_website()
