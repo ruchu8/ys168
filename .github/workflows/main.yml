@@ -1,8 +1,8 @@
-name: SSH Login
+name: ys168 Login
 
 on:
   schedule:
-    - cron: '0 20 2 * *'  # 每月的 5号 北京时间 19 点运行
+    - cron: '0 7 3 * *'  # 每个月 3号 7点登录
   workflow_dispatch:
 
 jobs:
