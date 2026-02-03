@@ -18,6 +18,10 @@ def login_to_website():
     try:
         response = requests.get(url, params=params, headers=headers)
         response.raise_for_status()  # 如果响应状态码不是200，会抛出异常
+        
+        # 仅新增这一行：打印登录接口返回的完整文本信息（核心需求）
+        print("=== 登录接口返回完整信息 ===")
+        print(response.text)
 
         if "ERR 管理密码不正确" in response.text:
             print("登录失败，管理密码不正确")
