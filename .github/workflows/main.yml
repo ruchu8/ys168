@@ -44,13 +44,13 @@ jobs:
           
           echo "距离上次提交的天数: $days_since_last_commit"
           
-          if [ $days_since_last_commit -ge 45 ]; then
-            echo "超过45天未提交，创建保活提交..."
+          if [ $days_since_last_commit -ge 25 ]; then
+            echo "超过25天未提交，创建保活提交..."
             git config --global user.name "GitHub Actions"
             git config --global user.email "actions@github.com"
             git commit --allow-empty -m "自动保活：防止工作流被禁用（距离上次提交已过去 ${days_since_last_commit} 天）"
             # 核心修复3：用GITHUB_TOKEN构建授权访问地址，实现无感知push
             git push https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/ruchu8/ys168.git main
           else
-            echo "无需保活（距离上次提交不足45天）"
+            echo "无需保活（距离上次提交不足25天）"
           fi
