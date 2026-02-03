@@ -8,17 +8,20 @@ on:
 jobs:
   ys168-login:
     runs-on: ubuntu-latest
+    # 新增：赋予job写入仓库内容的权限（核心修复1）
+    permissions:
+      contents: write  # 允许修改/推送仓库内容
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          persist-credentials: true
+          persist-credentials: false  # 关闭默认凭据（核心修复2），避免冲突
           fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13.2'  # 移除了cache配置
+          python-version: '3.13.2'
 
       - name: Install dependencies
         run: pip install requests
@@ -46,7 +49,8 @@ jobs:
             git config --global user.name "GitHub Actions"
             git config --global user.email "actions@github.com"
             git commit --allow-empty -m "自动保活：防止工作流被禁用（距离上次提交已过去 ${days_since_last_commit} 天）"
-            git push origin main  # 替换为你的分支名
+            # 核心修复3：用GITHUB_TOKEN构建授权访问地址，实现无感知push
+            git push https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/ruchu8/ys168.git main
           else
             echo "无需保活（距离上次提交不足45天）"
           fi
