@@ -5,23 +5,26 @@ on:
     - cron: '0 7 3 * *'  # 每月3日7点运行（UTC）
   workflow_dispatch:
 
+# 全局强制使用 Node.js 24，彻底消除 GitHub Actions 弃用警告
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   ys168-login:
     runs-on: ubuntu-latest
-    # 新增：赋予job写入仓库内容的权限（核心修复1）
     permissions:
       contents: write  # 允许修改/推送仓库内容
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2  # 升级到支持 Node.js 24 的最新版
         with:
-          persist-credentials: false  # 关闭默认凭据（核心修复2），避免冲突
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.3.0  # 升级到支持 Node.js 24 的最新版
         with:
-          python-version: '3.13.2'
+          python-version: '3.13'
 
       - name: Install dependencies
         run: pip install requests
@@ -36,11 +39,11 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
-      - name: Keep repo active (if needed)
+      - name: Keep repo active (auto keepalive)
         run: |
           last_commit=$(git log -1 --format=%cd --date=unix)
           current_time=$(date +%s)
-          days_since_last_commit=$(( (current_time - last_commit) / 86400 ))
+          days_since_last_commit=$(( (current_time - last_commit) / 86000 ))
           
           echo "距离上次提交的天数: $days_since_last_commit"
           
@@ -48,9 +51,8 @@ jobs:
             echo "超过25天未提交，创建保活提交..."
             git config --global user.name "GitHub Actions"
             git config --global user.email "actions@github.com"
-            git commit --allow-empty -m "自动保活：防止工作流被禁用（距离上次提交已过去 ${days_since_last_commit} 天）"
-            # 核心修复3：用GITHUB_TOKEN构建授权访问地址，实现无感知push
+            git commit --allow-empty -m "自动保活：防止工作流被禁用（${days_since_last_commit} 天未提交）"
             git push https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/ruchu8/ys168.git main
           else
-            echo "无需保活（距离上次提交不足25天）"
+            echo "无需保活"
           fi
