@@ -2,27 +2,24 @@ name: ys168 Login
 
 on:
   schedule:
-    - cron: '0 7 3 * *'  # 每月3日7点运行（UTC）
+    - cron: '0 7 3 * *'
   workflow_dispatch:
 
-# 全局强制使用 Node.js 24，彻底消除 GitHub Actions 弃用警告
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
+# 不再需要 FORCE_JAVASCRIPT_ACTIONS_TO_NODE24
 jobs:
   ys168-login:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 允许修改/推送仓库内容
+      contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.2.2  # 升级到支持 Node.js 24 的最新版
+        uses: actions/checkout@v5  # 原生 Node.js 24
         with:
           persist-credentials: false
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5.3.0  # 升级到支持 Node.js 24 的最新版
+        uses: actions/setup-python@v6  # 原生 Node.js 24
         with:
           python-version: '3.13'
 
@@ -39,11 +36,11 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
-      - name: Keep repo active (auto keepalive)
+      - name: Keep repo active
         run: |
           last_commit=$(git log -1 --format=%cd --date=unix)
           current_time=$(date +%s)
-          days_since_last_commit=$(( (current_time - last_commit) / 86000 ))
+          days_since_last_commit=$(( (current_time - last_commit) / 86400 ))
           
           echo "距离上次提交的天数: $days_since_last_commit"
           
